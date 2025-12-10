@@ -1,17 +1,29 @@
-snowbet/
- ├─ index.html
- ├─ games/
- │    ├─ slots3.html
- │    ├─ slots5.html
- │    ├─ blackjack.html
- │    ├─ poker.html
- │    └─ roulette.html
- ├─ css/
- │    └─ style.css
- └─ js/
-      ├─ core.js
-      ├─ slots3.js
-      ├─ slots5.js
-      ├─ blackjack.js
-      ├─ poker.js
-      └─ roulette.js
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SnowBet Casino</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>SnowBet Casino</h1>
+
+<div class="menu">
+    <button onclick="openGame('slots5')">🎰 5 Slots</button>
+    <button onclick="openGame('slots3')">🎰 3 Slots</button>
+    <button onclick="openGame('roulette')">🔴 Roulette</button>
+    <button onclick="openGame('blackjack')">🃏 Blackjack</button>
+    <button onclick="openGame('poker')">♠ Poker</button>
+</div>
+
+<div id="game-container"></div>
+
+<script>
+function openGame(name) {
+    document.getElementById("game-container").innerHTML =
+        `<iframe src="games/${name}.html" frameborder="0" width="100%" height="800"></iframe>`;
+}
+</script>
+
+</body>
+</html>
