@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Slot Machine</title>
+<style>
+  body {
+    margin: 0;
+    padding: 20px;
+    font-family: 'Arial Black', Arial, sans-serif;
+    background: linear-gradient(135deg, #1a0000 0%, #4a0000 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  
+  .machine {
+    background: linear-gradient(180deg, #8B0000 0%, #DC143C 50%, #8B0000 100%);
+    border: 8px solid #FFD700;
+    border-radius: 30px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8), inset 0 0 30px rgba(255,215,0,0.3);
+    position: relative;
+  }
+  
+  .top-sign {
+    background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
+    border: 4px solid #B8860B;
+    border-radius: 15px;
+    padding: 15px 30px;
+    margin-bottom: 30px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(255,215,0,0.5);
+  }
+  
+  .top-sign h1 {
+    margin: 0;
+    font-size: 36px;
+    color: #8B0000;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    letter-spacing: 3px;
+  }
+  
+  .display-panel {
+    background: #000;
+    border: 6px solid #FFD700;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: inset 0 0 20px rgba(255,215,0,0.3);
+  }
+  
+  .reels-container {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 25px;
+  }
+  
+  .reel-window {
+    width: 120px;
+    height: 140px;
+    background: #1a1a1a;
+    border: 5px solid #333;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 5px 15px rgba(0,0,0,0.8);
+  }
+  
+  .reel {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 70px;
+    background: linear-gradient(180deg, #fff 0%, #f0f0f0 100%);
+    transition: transform 0.1s;
+  }
+  
+  .reel-window::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, 
+      rgba(255,255,255,0.1) 0%, 
+      transparent 20%, 
+      transparent 80%, 
+      rgba(0,0,0,0.2) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  .info-display {
+    display: flex;
+    justify-content: space-around;
+    color: #FFD700;
+    font-size: 22px;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255,215,0,0.8);
+    margin-top: 20px;
+  }
+  
+  .info-item {
+    text-align: center;
+  }
+  
+  .info-label {
+    font-size: 14px;
+    color: #FFA500;
+    margin-bottom: 5px;
+  }
+  
+  .result-message {
+    text-align: center;
+    min-height: 40px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #FFD700;
+    text-shadow: 0 0 15px rgba(255,215,0,0.8);
+    margin: 15px 0;
+    animation: pulse 1s ease-in-out;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+  }
+  
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+  }
+  
+  .spin-button {
+    width: 200px;
+    height: 80px;
+    font-size: 32px;
+    font-weight: bold;
+    background: linear-gradient(180deg, #32CD32 0%, #228B22 100%);
+    border: 5px solid #FFD700;
+    border-radius: 50px;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4), inset 0 2px 5px rgba(255,255,255,0.3);
+    transition: all 0.1s;
+  }
+  
+  .spin-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  }
+  
+  .spin-button:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  }
+  
+  .spin-button:disabled {
+    background: linear-gradient(180deg, #666 0%, #444 100%);
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  
+  .bet-controls {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .bet-button {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    background: linear-gradient(180deg, #4169E1 0%, #1E3A8A 100%);
+    border: 3px solid #FFD700;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+  
+  .bet-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+  }
+  
+  .bet-button.active {
+    background: linear-gradient(180deg, #FFD700 0%, #FFA500 100%);
+    color: #8B0000;
+    border-color: #B8860B;
+  }
+  
+  .payout-table {
+    background: rgba(0,0,0,0.5);
+    border: 3px solid #FFD700;
+    border-radius: 15px;
+    padding: 15px;
+    margin-top: 20px;
+    color: #FFD700;
+    font-size: 14px;
+  }
+  
+  .payout-table h3 {
+    margin: 0 0 10px 0;
+    text-align: center;
+    font-size: 18px;
+  }
+  
+  .payout-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,215,0,0.2);
+  }
+  
+  @keyframes flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  
+  .winning {
+    animation: flash 0.5s ease-in-out 3;
+  }
+  
+  .lever-container {
+    position: absolute;
+    right: -80px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  .lever-base {
+    width: 60px;
+    height: 40px;
+    background: linear-gradient(180deg, #B8860B 0%, #8B6914 100%);
+    border: 3px solid #FFD700;
+    border-radius: 10px;
+    position: relative;
+  }
+  
+  .lever-arm {
+    width: 15px;
+    height: 180px;
+    background: linear-gradient(90deg, #C0C0C0 0%, #808080 50%, #C0C0C0 100%);
+    border: 2px solid #666;
+    border-radius: 8px;
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 3px 0 10px rgba(0,0,0,0.5);
+  }
+  
+  .lever-handle {
+    width: 35px;
+    height: 35px;
+    background: radial-gradient(circle, #FF0000 0%, #8B0000 100%);
+    border: 3px solid #FFD700;
+    border-radius: 50%;
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 4px 15px rgba(255,0,0,0.6);
+    cursor: grab;
+    transition: top 0.3s ease-out;
+  }
+  
+  .lever-handle:active {
+    cursor: grabbing;
+  }
+  
+  .lever-handle.pulled {
+    top: 165px;
+    transition: top 0.1s;
+  }
+</style>
+</head>
+<body>
+<div class="machine">
+  <div class="top-sign">
+    <h1>🎰 LUCKY 777 🎰</h1>
+  </div>
+  
+  <div class="lever-container">
+    <div class="lever-base">
+      <div class="lever-arm">
+        <div class="lever-handle" id="lever"></div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="display-panel">
+    <div class="reels-container">
+      <div class="reel-window">
+        <div class="reel" id="r1">🍒</div>
+      </div>
+      <div class="reel-window">
+        <div class="reel" id="r2">🍋</div>
+      </div>
+      <div class="reel-window">
+        <div class="reel" id="r3">🍇</div>
+      </div>
+    </div>
+    
+    <div class="result-message" id="result"></div>
+    
+    <div class="info-display">
+      <div class="info-item">
+        <div class="info-label">CREDITS</div>
+        <div>$<span id="bank">10000</span></div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">BET</div>
+        <div>$<span id="betDisplay">100</span></div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">WINS</div>
+        <div id="winCount">0</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="controls">
+    <button class="spin-button" id="spinBtn">SPIN</button>
+    <div class="bet-controls">
+      <button class="bet-button active" id="bet1">$100</button>
+      <button class="bet-button" id="bet2">$250</button>
+      <button class="bet-button" id="bet3">$500</button>
+    </div>
+  </div>
+  
+  <div class="payout-table">
+    <h3>💰 PAYOUT TABLE 💰</h3>
+    <div class="payout-row">
+      <span>7️⃣ 7️⃣ 7️⃣</span>
+      <span>20x - 50x Bet</span>
+    </div>
+    <div class="payout-row">
+      <span>⭐ ⭐ ⭐</span>
+      <span>10x - 20x Bet</span>
+    </div>
+    <div class="payout-row">
+      <span>🔔 🔔 🔔</span>
+      <span>5x - 10x Bet</span>
+    </div>
+    <div class="payout-row">
+      <span>Any 3 Match</span>
+      <span>3x - 5x Bet</span>
+    </div>
+    <div class="payout-row">
+      <span>Any 2 Match</span>
+      <span>0.5x - 1x Bet</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const symbols = ["🍒","🍋","🍇","🔔","⭐","7️⃣"];
+let bank = 10000;
+let BET = 100;
+let wins = 0;
+let spinning = false;
+
+const betButtons = document.querySelectorAll('.bet-button');
+
+function updatePayoutTable(bet) {
+  const payoutRows = document.querySelectorAll('.payout-table .payout-row span:nth-child(2)');
+  let payouts;
+
+  if(bet === 100) {
+    payouts = ['50', '300', '500', '1000', '5000'];
+  } else if(bet === 250) {
+    payouts = ['125', '750', '1250', '2500', '12000'];
+  } else if(bet === 500) {
+    payouts = ['250', '1500', '2500', '5000', '20000'];
+  }
+
+  // Map payouts to the payout table rows:
+  // payoutRows order:
+  // 0: 7️⃣ 7️⃣ 7️⃣ -> payouts[4]
+  // 1: ⭐ ⭐ ⭐   -> payouts[3]
+  // 2: 🔔 🔔 🔔   -> payouts[2]
+  // 3: Any 3 Match -> payouts[1]
+  // 4: Any 2 Match -> payouts[0]
+
+  payoutRows[0].textContent = `$${payouts[4]}`;
+  payoutRows[1].textContent = `$${payouts[3]}`;
+  payoutRows[2].textContent = `$${payouts[2]}`;
+  payoutRows[3].textContent = `$${payouts[1]}`;
+  payoutRows[4].textContent = `$${payouts[0]}`;
+}
+
+// Initialize payout table on page load
+updatePayoutTable(BET);
+
+betButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (spinning) return;
+    betButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (btn.id === 'bet1') BET = 100;
+    else if (btn.id === 'bet2') BET = 250;
+    else if (btn.id === 'bet3') BET = 500;
+    document.getElementById('betDisplay').textContent = BET;
+    
+    updatePayoutTable(BET);
+  });
+});
+
+// Lever functionality
+const lever = document.getElementById('lever');
+let leverStartY = 0;
+let leverPulled = false;
+
+lever.addEventListener('mousedown', (e) => {
+  if (spinning) return;
+  leverStartY = e.clientY;
+  leverPulled = false;
+  
+  const onMouseMove = (e) => {
+    const deltaY = e.clientY - leverStartY;
+    if (deltaY > 80 && !leverPulled) {
+      lever.classList.add('pulled');
+      leverPulled = true;
+      setTimeout(() => spin(), 100);
+    }
+  };
+  
+  const onMouseUp = () => {
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+    setTimeout(() => lever.classList.remove('pulled'), 300);
+  };
+  
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+});
+
+lever.addEventListener('touchstart', (e) => {
+  if (spinning) return;
+  leverStartY = e.touches[0].clientY;
+  leverPulled = false;
+  
+  const onTouchMove = (e) => {
+    const deltaY = e.touches[0].clientY - leverStartY;
+    if (deltaY > 80 && !leverPulled) {
+      lever.classList.add('pulled');
+      leverPulled = true;
+      setTimeout(() => spin(), 100);
+    }
+  };
+  
+  const onTouchEnd = () => {
+    document.removeEventListener('touchmove', onTouchMove);
+    document.removeEventListener('touchend', onTouchEnd);
+    setTimeout(() => lever.classList.remove('pulled'), 300);
+  };
+  
+  document.addEventListener('touchmove', onTouchMove);
+  document.addEventListener('touchend', onTouchEnd);
+});
+
+function spinReel(reel, duration) {
+  return new Promise(resolve => {
+    const startTime = Date.now();
+    const interval = setInterval(() => {
+      reel.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    }, 50);
+    
+    setTimeout(() => {
+      clearInterval(interval);
+      const finalSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+      reel.textContent = finalSymbol;
+      resolve(finalSymbol);
+    }, duration);
+  });
+}
+
+document.getElementById('spinBtn').onclick = async () => {
+  spin();
+};
+
+async function spin() {
+  if (spinning) return;
+  if (bank < BET) {
+    document.getElementById('result').textContent = '❌ INSUFFICIENT CREDITS';
+    return;
+  }
+  
+  spinning = true;
+  document.getElementById('spinBtn').disabled = true;
+  
+  const r1 = document.getElementById('r1');
+  const r2 = document.getElementById('r2');
+  const r3 = document.getElementById('r3');
+  const result = document.getElementById('result');
+  
+  result.textContent = '';
+  
+  // Spin reels with staggered timing
+  const s1 = await spinReel(r1, 1000);
+  const s2 = await spinReel(r2, 1500);
+  const s3 = await spinReel(r3, 2000);
+  
+  // Calculate win
+  let payout = 0;
+  let message = '';
+  
+  if (s1 === '7️⃣' && s2 === '7️⃣' && s3 === '7️⃣') {
+    payout = BET * (20 + Math.floor(Math.random() * 31)); // 20x-50x
+    message = '🎰 JACKPOT!!! 🎰';
+    wins++;
+    [r1, r2, r3].forEach(r => r.classList.add('winning'));
+  } else if (s1 === '⭐' && s2 === '⭐' && s3 === '⭐') {
+    payout = BET * (10 + Math.floor(Math.random() * 11)); // 10x-20x
+    message = '⭐ MEGA WIN! ⭐';
+    wins++;
+    [r1, r2, r3].forEach(r => r.classList.add('winning'));
+  } else if (s1 === '🔔' && s2 === '🔔' && s3 === '🔔') {
+    payout = BET * (5 + Math.floor(Math.random() * 6)); // 5x-10x
+    message = '🔔 BIG WIN! 🔔';
+    wins++;
+    [r1, r2, r3].forEach(r => r.classList.add('winning'));
+  } else if (s1 === s2 && s2 === s3) {
+    payout = BET * (3 + Math.floor(Math.random() * 3)); // 3x-5x
+    message = '💎 TRIPLE MATCH! 💎';
+    wins++;
+    [r1, r2, r3].forEach(r => r.classList.add('winning'));
+  } else if (s1 === s2 || s2 === s3 || s1 === s3) {
+    payout = Math.floor(BET * (0.5 + Math.random() * 0.6)); // 0.5x-1x
+    message = '✨ SMALL WIN ✨';
+    wins++;
+  } else {
+    bank -= BET;
+    message = '😔 TRY AGAIN';
+  }
+  
+  if (payout > 0) {
+    bank += payout;
+    result.textContent = `${message} +$${payout}`;
+  } else {
+    result.textContent = message;
+  }
+  
+  document.getElementById('bank').textContent = bank;
+  document.getElementById('winCount').textContent = wins;
+  
+  setTimeout(() => {
+    [r1, r2, r3].forEach(r => r.classList.remove('winning'));
+    spinning = false;
+    document.getElementById('spinBtn').disabled = false;
+  }, 1000);
+};
+</script>
+</body>
+</html>
+
+
+
+
